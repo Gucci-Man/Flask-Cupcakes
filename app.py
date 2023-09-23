@@ -1,6 +1,6 @@
 """Flask app for Cupcakes"""
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from models import *
 
 app = Flask(__name__)
@@ -81,3 +81,9 @@ def delete_cupcake(cupcake_id):
     db.session.delete(cupcake)
     db.session.commit()
     return jsonify(message="deleted")
+
+@app.route("/")
+def index_page():
+    """Renders html template and uses axios and JSON to call API"""
+    cupcakes = Cupcake.query.all()
+    return render_template('index.html', cupcakes=cupcakes)
