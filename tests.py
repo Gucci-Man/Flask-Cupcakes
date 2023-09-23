@@ -50,6 +50,7 @@ class CupcakeViewsTestCase(TestCase):
 
     def test_list_cupcakes(self):
         with app.test_client() as client:
+            """Testing listing all cupcakes"""
             resp = client.get("/api/cupcakes")
 
             self.assertEqual(resp.status_code, 200)
@@ -69,6 +70,7 @@ class CupcakeViewsTestCase(TestCase):
 
     def test_get_cupcake(self):
         with app.test_client() as client:
+            """Testing get"""
             url = f"/api/cupcakes/{self.cupcake.id}"
             resp = client.get(url)
 
@@ -86,6 +88,7 @@ class CupcakeViewsTestCase(TestCase):
 
     def test_create_cupcake(self):
         with app.test_client() as client:
+            """Testing create"""
             url = "/api/cupcakes"
             resp = client.post(url, json=CUPCAKE_DATA_2)
 
@@ -107,3 +110,39 @@ class CupcakeViewsTestCase(TestCase):
             })
 
             self.assertEqual(Cupcake.query.count(), 2)
+
+    def test_patch_cupcake(self):
+        with app.test_client() as client:
+            """Testing patch"""
+            url = f"/api/cupcakes/{self.cupcake.id}"
+            resp = client.patch(url, json={'flavor': "NewTestFlavor"})
+
+            self.assertEqual(resp.status_code, 200)
+
+            data = resp.json
+
+            # don't know what ID we'll get, make sure it's an int & normalize
+            self.assertIsInstance(data['cupcake']['id'], int)
+            del data['cupcake']['id']
+
+            self.assertEqual(data, {
+                "cupcake": {
+                    "flavor": "NewTestFlavor",
+                    "size": "TestSize",
+                    "rating": 5,
+                    "image": "http://test.com/cupcake.jpg"
+                }
+            })
+
+    def test_delete_cupcake(self):
+        with app.test_client() as client:
+            """Testing deletion"""
+            resp = app.test_client().delete(f"/api/cupcakes/{self.cupcake.id}")
+
+            self.assertEqual(resp.status_code, 200)
+
+            data = resp.json
+
+            self.assertEqual(data, {
+	            "message": "deleted"
+            })
